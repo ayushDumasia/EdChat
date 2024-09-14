@@ -1,26 +1,36 @@
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema({
-  password: {
-    type: String,
-    required: true,
-    minlength: 8,
-    message: 'Password must be at least 8 characters long',
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    validate: {
-      validator: function (email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      validate: {
+        validator: function (email) {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        },
+        message: 'Please provide a valid email address',
       },
-      message: 'Please provide a valid email address',
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 8,
+      message: 'Password must be at least 8 characters long',
+    },
+    role: {
+      type: String,
+      enum: ['Admin', 'User'],
+      default: 'User',
     },
   },
-});
+  {
+    timestamps: true,
+  },
+);
 
 // Hash the password before saving
 userSchema.pre('save', async function (next) {

@@ -34,6 +34,30 @@ function Chat() {
     },
   });
 
+  const setLocalData = () => {
+    localStorage.setItem('data', conversationHistory);
+  };
+
+  const saveHistory = async () => {
+    console.log(conversationHistory);
+    await axios
+      .post(
+        'http://localhost:3000/api/v1/message/addMessage',
+        {
+          data: conversationHistory,
+        },
+        {
+          withCredentials: true,
+        },
+      )
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   const {
     handleSubmit,
     control,
@@ -44,41 +68,50 @@ function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversationHistory]);
 
-  const handleRefresh = () => {
-    setConversationHistory([]);
-  };
+  // const handleRefresh = () => {
+  //   setConversationHistory([]);
+  // };
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
   };
 
-  const onSubmit = (data) => {
-    if (data.statement === '') return;
-
-    setConversationHistory((history) => [
-      ...history,
+  const onSubmit = async (data) => {
+    if (data.statement.trim() === '') return;
+    console.log(conversationHistory);
+    // Update conversation history with the user's statement
+    const updatedHistory = [
+      ...conversationHistory,
       { role: 'user', chat: data.statement },
-    ]);
-    form.reset({ statement: '' });
+    ];
+
+    // Optimistically update state
+    setConversationHistory(updatedHistory);
     setInput('');
+    form.reset({ statement: '' });
     setLoading(true);
 
-    axios
-      .post('https://educhatbot.onrender.com/api/v1/response', {
-        statement: data.statement,
-        conversationHistory,
-      })
-      .then((response) => {
-        setLoading(false);
-        setConversationHistory((history) => [
-          ...history,
-          { role: 'bot', chat: response.data.message },
-        ]);
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.log(error);
-      });
+    try {
+      const response = await axios.post(
+        'https://educhatbot.onrender.com/api/v1/response',
+        {
+          statement: data.statement,
+          conversationHistory: updatedHistory,
+        },
+      );
+
+      setConversationHistory((prevHistory) => [
+        ...prevHistory,
+        { role: 'bot', chat: response.data.message },
+      ]);
+    } catch (error) {
+      console.error('Error submitting message:', error);
+    } finally {
+      setLoading(false);
+    }
+
+    // Optionally save history
+    // await saveHistory();
   };
 
   const SpeechRecognition =
@@ -115,6 +148,17 @@ function Chat() {
         setIsListening(false);
       };
     }
+
+    const handleBeforeUnload = (event) => {
+      saveHistory();
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [recognition, handleSubmit]);
 
   const handleMicClick = () => {

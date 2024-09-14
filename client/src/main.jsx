@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
 import Analysis from './Pages/Analysis';
 import Chat from './Pages/Chat';
+import CollegeForm from './Pages/CollegeForm';
 import ErrorPage from './Pages/ErrorPage';
 import Home from './Pages/Home';
 import Profile from './Pages/Profile';
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
       {
         path: 'analysis',
         element: <Analysis />,
+      },
+      {
+        path: 'form',
+        element: <CollegeForm />,
       },
     ],
   },
