@@ -42,6 +42,10 @@ function SignIn() {
           secure: true,
           sameSite: 'None',
         });
+        Cookies.set('role', data.data.user.role, {
+          secure: true,
+          sameSite: 'None',
+        });
         navigate('/');
       },
       onError: (error) => {

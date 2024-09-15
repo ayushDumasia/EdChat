@@ -13,7 +13,8 @@ import { Link, NavLink } from 'react-router-dom';
 import CustomNavLink from './CustomNavLink';
 
 const Navbar = () => {
-  const [userCookie, setUserCookie] = useState(null); // State to store user cookie
+  const [userCookie, setUserCookie] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
   const checkUser = () => {
     const user = Cookies.get('user');
@@ -22,7 +23,13 @@ const Navbar = () => {
 
   useEffect(() => {
     checkUser();
+    getRole();
   }, []);
+
+  const getRole = () => {
+    setUserRole(Cookies.get('role'));
+    return Cookies.get('role');
+  };
 
   const handleSignOut = () => {
     Cookies.remove('user');
@@ -63,6 +70,16 @@ const Navbar = () => {
                 route="/analysis"
                 placeholder="Analysis"
               />
+              {userRole === 'Admin' && (
+                <CustomNavLink
+                  route="/form"
+                  placeholder="Form"
+                >
+                  {/* <button className="px-4 py-2 font-medium rounded-md bg-extend-secondary text-extend-primary hover:bg-extend-hoverSecondary">
+                    Form
+                  </button> */}
+                </CustomNavLink>
+              )}
             </div>
           </div>
 

@@ -6,6 +6,7 @@ export const createCollegeInfo = AsyncHandler(async (req, res) => {
   console.log(data);
 
   const newCollege = new College(data);
+  await newCollege.save();
   console.log(newCollege);
 
   res.json(newCollege);

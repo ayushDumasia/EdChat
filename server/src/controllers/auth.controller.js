@@ -76,17 +76,17 @@ export const signOut = AsyncHandler(async (req, res) => {
 });
 
 const setToken = (req, newUser) => {
-  const { email, _id } = newUser;
+  const { email, _id, role } = newUser;
 
   const accessToken = jwt.sign(
     {
-      user: { email, id: _id },
+      user: { email, id: _id, role: role },
     },
     process.env.ACCESS_TOKEN,
     { expiresIn: '1h' },
   );
 
-  req.user = { email, id: _id };
+  req.user = { email, id: _id, role: role };
 
   return accessToken;
 };

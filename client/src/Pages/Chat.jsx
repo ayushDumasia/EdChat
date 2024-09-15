@@ -6,11 +6,12 @@ import { MarkdownRenderer } from '@/Components/ui/Custom/MarkDown';
 import { Form, FormControl, FormField, FormItem } from '@/Components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
-import { Mic, MoveLeft, Trash } from 'lucide-react';
+import { Mic, MoveLeft, Trash, Volume2 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { NavLink } from 'react-router-dom';
+import { useSpeechSynthesis } from 'react-speech-kit'; // Import useSpeechSynthesis
 import { useDebounce } from 'use-debounce';
 import { z } from 'zod';
 
@@ -26,6 +27,8 @@ function Chat() {
   const [debouncedInput] = useDebounce(input, 300);
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const { speak, voices } = useSpeechSynthesis();
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -68,24 +71,17 @@ function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversationHistory]);
 
-  // const handleRefresh = () => {
-  //   setConversationHistory([]);
-  // };
-
   const handleInputChange = (e) => {
     setInput(e.target.value);
   };
 
   const onSubmit = async (data) => {
     if (data.statement.trim() === '') return;
-    console.log(conversationHistory);
-    // Update conversation history with the user's statement
     const updatedHistory = [
       ...conversationHistory,
       { role: 'user', chat: data.statement },
     ];
 
-    // Optimistically update state
     setConversationHistory(updatedHistory);
     setInput('');
     form.reset({ statement: '' });
@@ -100,15 +96,21 @@ function Chat() {
         },
       );
 
+      const botMessage = response.data.message;
       setConversationHistory((prevHistory) => [
         ...prevHistory,
-        { role: 'bot', chat: response.data.message },
+        { role: 'bot', chat: botMessage },
       ]);
+
+      // Optionally speak the bot's response
+      // speak({ text: botMessage, voice: voices[0] });
     } catch (error) {
       console.error('Error submitting message:', error);
     } finally {
       setLoading(false);
     }
+
+    console.log(conversationHistory);
 
     // Optionally save history
     // await saveHistory();
@@ -173,6 +175,56 @@ function Chat() {
     }
   };
 
+  const handleSpeakClick = (text) => {
+    // Log the text to be spoken
+    console.log('Speaking:', text);
+
+    // Ensure there are available voices and select a default if none is specified
+    if (!voices || voices.length === 0) {
+      console.error('No voices available for speech synthesis.');
+      return;
+    }
+
+    const selectedVoice = voices[2] || voices[0];
+    console.log('1');
+
+    // Set default options
+    const speakOptions = {
+      text,
+      voice: selectedVoice,
+      rate: 1,
+      pitch: 1.2,
+    };
+
+    console.log('2');
+
+    // Break text into smaller chunks if it's too long to avoid crashing
+    const maxTextLength = 200; // Maximum length for each chunk of text
+    const textChunks = text.match(new RegExp(`.{1,${maxTextLength}}`, 'g'));
+
+    console.log('3');
+
+    if (textChunks) {
+      // Recursive function to speak each chunk sequentially
+      const speakChunk = (index) => {
+        console.log('4');
+
+        if (index < textChunks.length) {
+          speak({
+            ...speakOptions,
+            text: textChunks[index],
+            onend: () => speakChunk(index + 1), // Speak the next chunk after the current one finishes
+            onerror: (e) => console.error('Speech synthesis error:', e),
+          });
+          console.log('5');
+        }
+      };
+
+      // Start speaking from the first chunk
+      speak(text);
+    }
+  };
+
   return (
     <div className="overflow-hidden h-screen bg-extend-primary">
       <PanelGroup direction="horizontal">
@@ -206,26 +258,42 @@ function Chat() {
         <Panel className="flex flex-col items-center p-8 px-24 pb-2 bg-extend-primary">
           <div className="mb-4 w-[85%] grow overflow-y-auto">
             <div
-              className="flex overflow-y-auto flex-col gap-4"
+              className="flex overflow-y-auto flex-col gap-4 p-4"
               aria-live="polite"
             >
               {conversationHistory.map((message, idx) => (
                 <div
                   key={idx}
-                  className={`max-w-[70%] p-4 shadow-xl ${
+                  className={`relative max-w-[70%] p-4 rounded-xl shadow-md transition-transform transform ${
                     message.role === 'user' ?
-                      'self-end rounded-l-xl rounded-br-none rounded-tr-xl bg-extend-secondary text-extend-primary'
-                    : 'self-start rounded-r-xl rounded-bl-none rounded-tl-xl bg-extend-secondaryBase text-gray-800'
+                      'self-end bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                    : 'self-start bg-gray-100 text-gray-800'
                   }`}
+                  style={{ animation: 'fadeIn 0.3s ease' }} // Smooth fade-in for new messages
                 >
                   <MarkdownRenderer markdown={message.chat} />
+
+                  {/* Display button for bot messages (excluding loading state) */}
+                  {message.role === 'bot' && !loading && (
+                    <button
+                      className="absolute right-2 bottom-2 p-2 bg-gray-300 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-gray-400"
+                      onClick={() => handleSpeakClick(message.chat.trim())}
+                    >
+                      <Volume2 className="text-gray-600" />
+                    </button>
+                  )}
                 </div>
               ))}
+
+              {/* Display a loading indicator with animation */}
               {loading && (
-                <div className="max-w-[70%] self-start rounded-r-xl rounded-bl-none rounded-tl-xl bg-extend-secondaryBase p-4 shadow-md">
+                <div className="max-w-[70%] self-start rounded-xl bg-gray-100 p-4 shadow-md flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full border-4 border-t-4 border-gray-200 ease-linear loader"></div>
                   <p>Loading...</p>
                 </div>
               )}
+
+              {/* Keeps the scroll to the bottom on new messages */}
               <div ref={messagesEndRef} />
             </div>
           </div>

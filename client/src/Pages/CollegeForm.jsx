@@ -7,6 +7,7 @@ import {
   SelectTrigger,
 } from '@/Components/ui/select';
 import { Textarea } from '@/Components/ui/textarea';
+import axios from 'axios';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import 'tailwindcss/tailwind.css';
 
@@ -111,14 +112,23 @@ const CollegeForm = () => {
     name: 'other_info',
   });
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post(
+        '/api/v1/collegeInfo/createCollege',
+        data,
+      );
+      console.log('Form submitted successfully:', response.data);
+      reset(); // Reset the form on successful submission
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="p-6 mx-au`to mt-10 space-y-6 max-w-4xl bg-gray-100 rounded-lg shadow-lg"
+      className="p-6 mx-auto mt-10 space-y-6 max-w-4xl bg-gray-100 rounded-lg shadow-lg"
     >
       <div className="mb-4 text-2xl font-bold">College Information Form</div>
 

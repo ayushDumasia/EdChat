@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { AsyncHandler } from '../utils/AsyncHandler.js';
+import { AsyncHandler } from '../utils/AsyncHandler.utils.js';
 
 export const authValidator = AsyncHandler((req, res, next) => {
   const cookie = req.cookies?.userCookie;
