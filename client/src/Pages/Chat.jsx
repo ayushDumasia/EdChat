@@ -6,7 +6,7 @@ import { MarkdownRenderer } from '@/Components/ui/Custom/MarkDown';
 import { Form, FormControl, FormField, FormItem } from '@/Components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
-import { Mic, MoveLeft, Trash, Volume2 } from 'lucide-react';
+import { Mic, MoveLeft, Trash } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
@@ -234,22 +234,25 @@ function Chat() {
           minSize={20}
           maxSize={20}
         >
-          <div className="flex justify-between items-center align-middle text-end">
+          <div className="flex justify-between items-center p-2 bg-extend-secondaryBase shadow-md rounded-md">
             <NavLink
               to="/"
-              className="flex items-center mb-2 text-sm font-bold text-blue-600 underline"
+              className="flex items-center text-sm font-bold text-blue-600 hover:text-blue-800"
+              aria-label="Back to home"
             >
-              <MoveLeft className="mr-2 size-5" />
-              back to home
-              {/* EduChat */}
+              <MoveLeft className="mr-2 w-4 h-4" />
+              Back to home
             </NavLink>
-            <button
-              onClick={() => {
-                location.reload();
-              }}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => location.reload()}
+              aria-label="Reload the page"
+              className="p-2"
             >
-              <Trash className="transition-colors duration-300 cursor-pointer size-4 text-extend-text" />
-            </button>
+              <Trash className="w-4 h-4 text-red-500 hover:text-red-700" />
+            </Button>
           </div>
         </Panel>
 
@@ -274,21 +277,20 @@ function Chat() {
                   <MarkdownRenderer markdown={message.chat} />
 
                   {/* Display button for bot messages (excluding loading state) */}
-                  {message.role === 'bot' && !loading && (
+                  {/* {message.role === 'bot' && !loading && (
                     <button
                       className="absolute right-2 bottom-2 p-2 bg-gray-300 rounded-full shadow-md transition duration-300 ease-in-out hover:bg-gray-400"
                       onClick={() => handleSpeakClick(message.chat.trim())}
                     >
                       <Volume2 className="text-gray-600" />
                     </button>
-                  )}
+                  )} */}
                 </div>
               ))}
 
-              {/* Display a loading indicator with animation */}
               {loading && (
                 <div className="max-w-[70%] self-start rounded-xl bg-gray-100 p-4 shadow-md flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full border-4 border-t-4 border-gray-200 ease-linear loader"></div>
+                  {/* <div className="w-6 h-6 rounded-full border-4 border-t-4 border-gray-200 ease-linear loader"></div> */}
                   <p>Loading...</p>
                 </div>
               )}
