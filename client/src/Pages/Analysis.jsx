@@ -179,7 +179,7 @@ function Analysis() {
         </Popover>
       </div>
 
-      <div className="flex flex-col gap-8 md:flex-row">
+      <div className="flex flex-col items-center justify-center gap-8 md:flex-row">
         <div className="flex flex-col w-full max-w-[700px] p-6 rounded-md bg-white">
           <div className="flex justify-between w-full">
             <h3 className="mb-4 text-lg font-bold text-center">
@@ -250,7 +250,7 @@ function Analysis() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-8 md:flex-row">
+      <div className="flex flex-col gap-8 justify-center md:flex-row">
         <div className="flex flex-col w-full max-w-[700px] p-6 rounded-md bg-white">
           <div className="flex justify-between w-full">
             <h3 className="mb-4 text-lg font-bold text-center">

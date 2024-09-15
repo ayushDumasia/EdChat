@@ -7,7 +7,7 @@ const Home = () => {
     <div className="bg-gray-100 text-text">
       <section
         className="flex relative justify-center items-center h-screen bg-center bg-no-repeat bg-cover"
-        style={{ backgroundImage: `url(/src/assets/college2.jpg)` }}
+        style={{ backgroundImage: `url(/src/assets/college3.jpg)` }}
       >
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative z-10 px-6 mx-auto max-w-4xl text-center text-extend-primary">
